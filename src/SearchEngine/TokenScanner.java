@@ -9,27 +9,29 @@ import java.util.Scanner;
 
 
 public class TokenScanner {
-	private String filePath = null;
+
 	private Scanner scanner;
 	
 	LinkedList<String> tokQueue;
 	
-	public TokenScanner(String path) {
-		openFile(path);
+	public TokenScanner(File f) {
+		openFile(f);
 		tokQueue = new LinkedList<>();
 	}
 	
-	public boolean openFile(String path){
-		if (filePath != null)
-			return false;
+	public TokenScanner(String s) {
+		scanner = new Scanner(s);
+		tokQueue = new LinkedList<>();
+	}
+	
+	public boolean openFile(File path){
 		
 		try {
-			scanner = new Scanner(new File(path));
+			scanner = new Scanner(path);
 		} catch (FileNotFoundException e) {
 			System.err.println(path+" not found");
 			return false;
 		}
-		filePath = path;
 		
 		return true;
 	}
@@ -37,10 +39,7 @@ public class TokenScanner {
 	
 	
 	public void closeFile(){
-		if (filePath != null){
-			filePath= null;
-			scanner.close();
-		}
+		scanner.close();
 	}
 	
 	
