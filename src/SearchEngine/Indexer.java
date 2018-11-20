@@ -5,10 +5,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Indexer {
 	
+	InvertedList invertedList;
+	
+	public Indexer() {
+		invertedList = new InvertedList();
+	}
 	
 	/***
 	 * 
@@ -64,7 +71,7 @@ public class Indexer {
 			pairsList.add(new TermDocPair(token, docID, 1));
 			token = tscanner.getNextToken();
 		}
-		TermDocPair[] arr = pairsList.toArray(new TermDocPair[0]);
+		TermDocPair[] arr = pairsList.toArray(new TermDocPair[pairsList.size()]);
 		Arrays.sort(arr);
 		return arr;
 	}
@@ -80,6 +87,7 @@ public class Indexer {
 	public TermDocPair[] readDoc(int docID, String path) throws IOException {
 		return tokenize(docID, new TokenScanner(new File(path)));
 	}
+	
 	
 	/**
 	 * merges the frequency of the termdoc pair with the same term.
@@ -98,6 +106,64 @@ public class Indexer {
 			p = arr[i];
 		}
 		return pairsList.toArray(new TermDocPair[0]);
+	}
+	
+	public void addToIndex(TermDocPair[] pairs) {
+		for (TermDocPair termDocPair : pairs) {
+			invertedList.addTermDocPair(termDocPair);
+		}
+	}
+	
+	/**
+	 * searches all the terms and returns all the results that contains all of the terms along with their scores as the freq part (not sorted)
+	 * @param terms: array of the terms
+	 * @return list of document frequency pairs in which frequency is the score.
+	 */
+	public LinkedList<DocFreq> search(String[] terms) {
+		//if there was no term
+		if (terms.length==0)
+			return new LinkedList<>();
+		//take the first term and make the initial result list
+		LinkedList<DocFreq> results = new LinkedList<>();
+		LinkedList<DocFreq> termResult = invertedList.getListOf(terms[0]);
+		for (DocFreq docFreq : termResult) {
+			results.add(new DocFreq(docFreq.docID, docFreq.freq));
+		}
+		
+		
+		//merge the next terms
+		for (int i = 1; i < terms.length; i++) {
+			termResult = invertedList.getListOf(terms[i]);
+			Iterator<DocFreq> it1 = results.iterator();
+			if (!it1.hasNext())
+				return new LinkedList<>();
+			DocFreq df1 = it1.next();
+			for (DocFreq df2 : termResult) {
+				
+				while (it1.hasNext() && df1.docID<df2.docID) {
+					it1.remove();
+					df1 = it1.next();
+				}
+				
+				if ((!it1.hasNext()) && df1.docID<df2.docID) {
+					it1.remove();
+					break;
+				}
+				
+				if (df1.docID==df2.docID) {
+					df1.freq += df2.freq;
+					if (it1.hasNext())
+						df1 = it1.next();
+					else
+						break;
+				}
+			}
+		}
+		return results;
+	}
+	
+	public LinkedList<DocFreq> MergeLists(LinkedList<DocFreq> result, LinkedList<DocFreq> termResult){
+		return null;
 	}
 	
 }

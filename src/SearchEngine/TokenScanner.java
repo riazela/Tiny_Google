@@ -54,10 +54,11 @@ public class TokenScanner {
 				s = scanner.next();
 			else
 				s = tokQueue.poll();
-			
 			//copy of normalize if you changed here you should change normalize too
-			if (!s.matches(".*([a-z]|[1-9])+.*"))
-				return "";
+			if (!s.matches(".*([a-z]|[1-9])+.*")) {
+				s="";
+				continue;
+			}
 			//do not split email address or website address
 			if (!(s.matches("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" 
 					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$") || s.matches("(https|https|www|ftp)+.*"))){
@@ -77,14 +78,14 @@ public class TokenScanner {
 		scanner.reset();
 		ArrayList<String> strings = new ArrayList<String>();
 		String s=getNextToken();
-		while (s!= null){
+		while (!s.equals("")){
 			if (!s.equals(""))
 				strings.add(s);
 			s = getNextToken();
 		}
 		if (strings.size() == 0)
 			return new String[0];
-		return strings.toArray(new String[1]);
+		return strings.toArray(new String[0]);
 	}
 	
 }

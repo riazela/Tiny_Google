@@ -1,9 +1,9 @@
 package SearchEngine;
 
 public class TermDocPair implements Comparable<TermDocPair>{
-	String term;
-	int doc;
-	int freq;
+	public String term;
+	public int doc;
+	public int freq;
 	public TermDocPair(String term, int doc, int freq) {
 		super();
 		this.term = term;
@@ -12,16 +12,21 @@ public class TermDocPair implements Comparable<TermDocPair>{
 	}
 	
 	public boolean merge(TermDocPair t) {
-		if (t.term.equals(this.term)) {
+		if (t.term.equals(this.term) && t.doc==this.doc) {
 			this.freq += t.freq;
 			return true;
 		}
 		return false;
 	}
 	
+	
+	
 	@Override
 	public int compareTo(TermDocPair o) {
-		return this.term.compareTo(o.term);
+		if (this.doc==o.doc)
+			return this.term.compareTo(o.term);
+		else
+			return this.doc-o.doc;
 	}
 	
 	
