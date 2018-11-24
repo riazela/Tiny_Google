@@ -22,6 +22,7 @@ public class Main {
 			System.err.println("documents path is wrong!");
 			return;
 		}
+		
 		File[] docsFile = dir.listFiles();
 		int[] docIDs = new int[docsFile.length];
 		String temp;
