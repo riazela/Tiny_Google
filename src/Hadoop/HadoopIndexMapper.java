@@ -13,7 +13,7 @@ import SearchEngine.TokenScanner;
 public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     @Override
-    public void map(LongWritable key, Text value, Context context) throws InterruptedException {
+    public void map(LongWritable key, Text value, Context context) throws InterruptedException, IOException {
 
         String line = value.toString();
         String valuestr = ((FileSplit) context.getInputSplit()).getPath().getName();
@@ -22,12 +22,8 @@ public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
         TokenScanner tokenizer= new TokenScanner(line);
         String word = tokenizer.getNextToken();
         while (!word.equals("")){
-            try{
-                context.write(new Text(word), documentName);
-                word = tokenizer.getNextToken();
-            } catch(IOException exp){
-                exp.printStackTrace();
-            }
+        	context.write(new Text(word), documentName);
+	        word = tokenizer.getNextToken();
         }
     }
 }
