@@ -24,6 +24,7 @@ public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
         while (!word.equals("")){
             try{
                 context.write(new Text(word), documentName);
+                word = tokenizer.getNextToken();
             } catch(IOException exp){
                 exp.printStackTrace();
             }
