@@ -8,6 +8,13 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
+              	
+  	<property name="project.dir" value="."/>
+	<property name="build.dir" value="${project.dir}/build"/>
+	<property name="config.dir" value="${project.dir}/config"/>
+	<property name="jar.file" value="${build.dir}/lib/${module.id}.jar"/>
+	<property name="amp.file" value="${build.dir}/dist/${module.id}.amp"/>
+              	
     <path id="Tiny_Google.classpath">
         <pathelement location="bin"/>
         <pathelement location="hadoop-common-2.7.2.jar"/>
@@ -40,4 +47,11 @@
             <classpath refid="Tiny_Google.classpath"/>
         </java>
     </target>
+              	
+  	<target name="package-jar" depends="build-project">
+		<jar destfile="project.jar" >
+			<fileset dir="bin" excludes="**/custom*,**/*Test*" includes="**/*.class" />
+		</jar>
+	</target>
+
 </project>
