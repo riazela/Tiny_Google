@@ -18,7 +18,7 @@ public class HadoopSearcher {
 	    Configuration conf = new Configuration();
 	    conf.set("query", args[2]);
 	    Job job = Job.getInstance(conf);
-	    job.setJarByClass(Hadoop.HadoopIndexer.class); //TODO: change here
+	    job.setJarByClass(Hadoop.HadoopSearcher.class); 
 	    job.setJobName("Searching Documents");
 
 	    FileInputFormat.addInputPath(job, new Path(args[0]));
