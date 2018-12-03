@@ -27,9 +27,11 @@ public class HadoopIndexReducer
     //sorting the documents based on name
     String[] documentNames = counter.keySet().toArray(new String[0]);
     Arrays.sort(documentNames);
-    for (String docname:documentNames){
-        context.write(word, new Text(""+docname+":"+counter.get(docname)));
+    String val = ""+documentNames[0]+":"+counter.get(documentNames[1]);
+    for (int i = 1; i < documentNames.length; i++) {
+    	val = val + " " + documentNames[0]+":"+counter.get(documentNames[1]);
     }
+        context.write(word, new Text(val));
   }
 }
 
