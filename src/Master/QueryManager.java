@@ -48,7 +48,7 @@ public class QueryManager {
 			
 			TermDocPair[] pairs = null;
 			try {
-				pairs = indexer.readDoc(id, docFile.getName());
+				pairs = indexer.readDoc(id,  "docs/" + docFile.getName());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -56,7 +56,7 @@ public class QueryManager {
 			pairs = indexer.mergeSortedList(pairs);
 			indexer.addToIndex(pairs);
 			System.out.println(id);
-			str = id.toString() + "\n";
+			str = id.toString()+ ": "+ ID2Doc.get(id)+ "\n";
 			return str;
 		}
 	}
@@ -100,7 +100,7 @@ public class QueryManager {
 				pairs = indexer.mergeSortedList(pairs);
 				indexer.addToIndex(pairs);
 				System.out.println(key);
-				str = key.toString();
+				str = key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
 				str = str + "\n";
 			}
 			
@@ -116,7 +116,8 @@ public class QueryManager {
 			LinkedList<DocFreq> results = indexer.search(queryTerms);
 			for (DocFreq docFreq : results) {
 				System.out.println(docFreq.docID + "    " + docFreq.freq);
-				str = str + docFreq.docID + "    " + docFreq.freq + "\n";
+				
+				str = str + ID2Doc.get(docFreq.docID ) + "    " + docFreq.freq + "\n";
 			}
 			
 			return str;

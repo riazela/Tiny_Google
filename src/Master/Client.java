@@ -108,25 +108,31 @@ public class Client {
 			String[] messageParts = messagestr.split(" ");
 			String str = "";
 			switch (messageParts[0]) {
-			case "indexdir":
-				System.out.println("hereeeeeeeeee");
+			case "indexdir":{
 				str = QueryManager.indexDir(messageParts[1]);
+				str = "directory indexed: \n" + str;
 				outputStream.write(str);
 				outputStream.flush();
-			case "indexdoc":
+				break;
+			}
+			case "indexdoc":{
+				str = "document indexed: \n" + str;
 				str = QueryManager.indexDoc(messageParts[1]);
 				outputStream.write(str);
 				outputStream.flush();
 				break;
-			case "search":
+			}
+			case "search":{
 				String query = messagestr.replace("search ", "");
 				str = QueryManager.search(query);
 				outputStream.write(str);
 				outputStream.flush();
 				break;
-			case "close":
+			}
+			case "close":{
 				this.close();
 				return;
+			}
 			default:
 				break;
 			}
