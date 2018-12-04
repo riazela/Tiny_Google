@@ -1,5 +1,7 @@
 package Hadoop;
 
+import java.util.Date;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -13,7 +15,8 @@ public class HadoopIndexer {
       System.err.println("Usage: HadoopIndexer <input path> <output path>");
       System.exit(-1);
     }
-    
+    Date date = (new Date());
+    long time =  (date).getTime();
     Job job = Job.getInstance();
     job.setJarByClass(Hadoop.HadoopIndexer.class);
     job.setJobName("Indexing Documents");
@@ -26,7 +29,8 @@ public class HadoopIndexer {
 
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
-    
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
+    int res = job.waitForCompletion(true) ? 0 : 1;
+    System.out.println(date.getTime()-time);
+    System.exit(res);
   }
 }
