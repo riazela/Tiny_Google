@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import SearchEngine.TokenScanner;
 
-public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, TermFreqWritable> {
 
     @Override
     public void map(LongWritable key, Text value, Context context) throws InterruptedException, IOException {
@@ -22,7 +22,7 @@ public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, Text> {
         TokenScanner tokenizer= new TokenScanner(line);
         String word = tokenizer.getNextToken();
         while (!word.equals("")){
-        	context.write(new Text(word), documentName);
+        	context.write(new Text(word), new TermFreqWritable(documentName, new IntWritable(1)));
 	        word = tokenizer.getNextToken();
         }
     }

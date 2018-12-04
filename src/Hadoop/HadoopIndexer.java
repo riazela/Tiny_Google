@@ -26,6 +26,9 @@ public class HadoopIndexer {
     
     job.setMapperClass(HadoopIndexMapper.class);
     job.setReducerClass(HadoopIndexReducer.class);
+    
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(TermFreqWritable.class);
 
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
