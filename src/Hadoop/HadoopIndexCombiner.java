@@ -27,6 +27,9 @@ public class HadoopIndexCombiner extends Reducer<Text, TermFreqWritable, Text, T
 					context.write(word, new TermFreqWritable(lastValue.getTerm(), new IntWritable(freq)));
 					freq = value.getFreq().get();
 				}
+			} else
+			{
+				freq = value.getFreq().get();
 			}
 			lastValue = value;
 		}
