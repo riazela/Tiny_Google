@@ -32,7 +32,6 @@ public class HadoopSearcherMapper  extends Mapper<LongWritable, Text, Text, Term
         Text termtext = new Text(term);
         
         if (queryOccurance >0) {
-        	System.out.println("found a term "+term);
         	for (int i = 1; i < lineparts.length; i++) {
         		String[] t = lineparts[i].split(":");
         		String docname = t[0];
