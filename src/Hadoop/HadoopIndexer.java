@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class HadoopIndexer {
   public static void main(String[] args) throws Exception {
     if (args.length != 2) {
-      System.err.println("Usage: MaxTemperature <input path> <output path>");
+      System.err.println("Usage: HadoopIndexer <input path> <output path>");
       System.exit(-1);
     }
     

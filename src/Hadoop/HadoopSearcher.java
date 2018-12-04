@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class HadoopSearcher {
 	public static void main(String[] args) throws Exception {
 	    if (args.length != 3) {
-	      System.err.println("Usage: MaxTemperature <input path> <output path>");
+	      System.err.println("Usage: HadoopSearcher <index path> <output path> <query>");
 	      System.exit(-1);
 	    }
 	    
