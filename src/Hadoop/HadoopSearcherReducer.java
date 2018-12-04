@@ -22,7 +22,7 @@ public class HadoopSearcherReducer extends Reducer<Text, TermFreqWritable, Text,
 		String[] queryParts = (new TokenScanner(query)).getAllTokens();
 		query = "";
 		for (int i = 0; i < queryParts.length; i++) {
-			query = query+queryParts+" ";
+			query = query+queryParts[i]+" ";
 		}
 		
 		int score = 0;
