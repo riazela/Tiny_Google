@@ -32,6 +32,7 @@ public class ClientSample {
 			System.out.println("Enter command (indexdir/indexdoc/search): ");
 			String cmd = scanner.nextLine() + "\n";
 			String[] cmdParts = cmd.split(" ");
+			String str = " ";
 			
 			if(cmdParts.length < 2) {
 				System.err.println("Not enough arguments!");
@@ -46,21 +47,31 @@ public class ClientSample {
 				
 				out.write(cmd);
 				out.flush();
-				System.out.println(in.readLine());
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
+				
 			}
 			else if (cmdParts[0].equals("indexdoc"))
 			{
 				
 				out.write(cmd);
 				out.flush();
-				System.out.println(in.readLine());
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
 				
 			}
 			else if (cmdParts[0].equals("search"))
 			{
 				out.write(cmd);
 				out.flush();
-				System.out.println(in.readLine());
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
 				
 			}
 			else if (cmdParts[0].equals("close"))

@@ -100,8 +100,7 @@ public class QueryManager {
 				pairs = indexer.mergeSortedList(pairs);
 				indexer.addToIndex(pairs);
 				System.out.println(key);
-				str = key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
-				str = str + "\n";
+				str = str + key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
 			}
 			
 			return str;

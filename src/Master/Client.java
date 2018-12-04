@@ -111,13 +111,15 @@ public class Client {
 			case "indexdir":{
 				str = QueryManager.indexDir(messageParts[1]);
 				str = "directory indexed: \n" + str;
+				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
 			}
 			case "indexdoc":{
-				str = "document indexed: \n" + str;
 				str = QueryManager.indexDoc(messageParts[1]);
+				str = "document indexed: \n" + str;
+				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
@@ -125,6 +127,7 @@ public class Client {
 			case "search":{
 				String query = messagestr.replace("search ", "");
 				str = QueryManager.search(query);
+				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
