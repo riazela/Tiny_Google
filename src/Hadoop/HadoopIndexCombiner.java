@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
@@ -17,19 +18,21 @@ public class HadoopIndexCombiner extends Reducer<Text, TermFreqWritable, Text, T
 		HashMap<String, Integer> counter = new HashMap();
 
 		TermFreqWritable lastValue = null;
+		int freq = 0;
 		for (TermFreqWritable value : values) {
 			if (lastValue != null) {
 				if (lastValue.getTerm().equals(value.getTerm())) {
-					value.getFreq().set(value.getFreq().get() + lastValue.getFreq().get());
+					freq += value.getFreq().get();
 				} else {
-					context.write(word, lastValue);
+					context.write(word, new TermFreqWritable(lastValue.getTerm(), new IntWritable(freq)));
+					freq = value.getFreq().get();
 				}
 			}
 			lastValue = value;
 		}
 
 		if (lastValue != null) {
-			context.write(word, lastValue);
+			context.write(word, new TermFreqWritable(lastValue.getTerm(), new IntWritable(freq)));
 		}
 
 	}
