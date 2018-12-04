@@ -34,7 +34,10 @@ public class HadoopSearcherReducer extends Reducer<Text, TermFreqWritable, Text,
 	    
 	    if (query.equals("")) {
 	    	context.write(key, new IntWritable(score));
+	    } else {
+	    	context.write(key, new IntWritable(-score));
 	    }
+	    
 	  }
 	}
 
