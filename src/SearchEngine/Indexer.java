@@ -122,10 +122,12 @@ public class Indexer {
 		TermDocPair p = arr[0];
 		
 		for (int i = 1; i < arr.length; i++) {
-			if (!p.merge(arr[i]))
+			if (!p.merge(arr[i])) {
 				pairsList.add(p);
-			p = arr[i];
+				p = arr[i];
+			}
 		}
+		pairsList.add(p);
 		return pairsList.toArray(new TermDocPair[0]);
 	}
 	
