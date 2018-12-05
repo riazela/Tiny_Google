@@ -31,8 +31,13 @@ public class TermFreqWritable implements WritableComparable<TermFreqWritable> {
 
 	// Setter method to set the values of WebLogWritable object
 	public void set(Text term, IntWritable freq) {
-		this.term = term;
-		this.freq = freq;
+		this.term.set(term); 
+		this.freq.set(freq.get());
+	}
+	
+	public void set(String term, int freq) {
+		this.term.set(term); 
+		this.freq.set(freq);
 	}
 
 	public Text getTerm() {
