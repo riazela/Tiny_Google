@@ -2,12 +2,17 @@ package SearchEngine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Scanner;
+import java.util.Set;
 
 public class Indexer {
 	
@@ -114,6 +119,11 @@ public class Indexer {
 		}
 	}
 	
+	public void addToIndex(TermDocPair pair) {
+			invertedList.addTermDocPair(pair);
+		
+	}
+	
 	/**
 	 * searches all the terms and returns all the results that contains all of the terms along with their scores as the freq part (not sorted)
 	 * @param terms: array of the terms
@@ -164,6 +174,36 @@ public class Indexer {
 	
 	public LinkedList<DocFreq> MergeLists(LinkedList<DocFreq> result, LinkedList<DocFreq> termResult){
 		return null;
+	}
+	
+	public void saveToFile(String path) throws IOException {
+		File file = new File(path);
+		FileWriter writer = new FileWriter(file);
+		Set<String> terms = invertedList.lookupTable.keySet();
+		for (String term : terms) {
+			writer.write(term);
+			for (DocFreq df: invertedList.getListOf(term)) {
+				writer.write(" " + df.docID+" "+df.freq);
+			}
+			writer.write("\n");
+		}
+		writer.flush();
+		writer.close();
+	}
+	
+	public static Indexer loadFromFile(String path) throws IOException {
+		File file = new File(path);
+		Scanner scanner = new Scanner(file);
+		Indexer indexer = new Indexer();
+		
+		while (scanner.hasNextLine()) {
+			String line = scanner.nextLine();
+			Scanner linescanner = new Scanner(line);
+			String term = linescanner.next();
+			while (linescanner.hasNext())
+				indexer.addToIndex(new TermDocPair(term, linescanner.nextInt(), linescanner.nextInt()));
+		}
+		return indexer;
 	}
 	
 }
