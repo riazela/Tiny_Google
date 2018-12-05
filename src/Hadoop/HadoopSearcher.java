@@ -1,5 +1,7 @@
 package Hadoop;
 
+import java.util.Date;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -14,6 +16,8 @@ public class HadoopSearcher {
 	      System.err.println("Usage: HadoopSearcher <index path> <output path> <query>");
 	      System.exit(-1);
 	    }
+	    Date date = (new Date());
+	    long time =  (date).getTime();
 	    
 	    Configuration conf = new Configuration();
 	    conf.set("query", args[2]);
@@ -33,6 +37,8 @@ public class HadoopSearcher {
 	    job.setOutputKeyClass(Text.class);
 	    job.setOutputValueClass(IntWritable.class);
 	    
-	    System.exit(job.waitForCompletion(true) ? 0 : 1);
+	    int res = job.waitForCompletion(true) ? 0 : 1;
+	    System.out.println(date.getTime()-time);
+	    System.exit(res);
 	}
 }

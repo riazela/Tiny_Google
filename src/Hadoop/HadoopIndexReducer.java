@@ -9,19 +9,19 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class HadoopIndexReducer
-  extends Reducer<Text, Text, Text, Text> {
+  extends Reducer<Text, TermFreqWritable, Text, Text> {
 
   @Override
-  public void reduce(Text word, Iterable<Text> values,
+  public void reduce(Text word, Iterable<TermFreqWritable> values,
       Context context)
       throws IOException, InterruptedException {
 
     HashMap<String, Integer> counter = new HashMap();
     
-    for (Text value : values) {
-        String doc = value.toString();
+    for (TermFreqWritable value : values) {
+        String doc = value.getTerm().toString();
         doc.replaceAll(":", "");
-        counter.put(doc, counter.getOrDefault(doc, new Integer(0)) + 1);
+        counter.put(doc, counter.getOrDefault(doc, new Integer(0)) + value.getFreq().get());
     }
     
     //sorting the documents based on name

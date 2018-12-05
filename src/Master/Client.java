@@ -21,12 +21,13 @@ public class Client {
 	
 		
 	public static void waitForClient(int port) {
+		final int mport = port;
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				ServerSocket serverSocket;
 				try {
-					 serverSocket = new ServerSocket(port);
+					 serverSocket = new ServerSocket(mport);
 					 serverSocket.setSoTimeout(1000);
 				} catch (IOException e) {
 					e.printStackTrace();
