@@ -77,7 +77,6 @@ public class Indexer {
 			token = tscanner.getNextToken();
 		}
 		TermDocPair[] arr = pairsList.toArray(new TermDocPair[pairsList.size()]);
-		Arrays.sort(arr);
 		return arr;
 	}
 	
@@ -93,13 +92,30 @@ public class Indexer {
 		return tokenize(docID, new TokenScanner(new File(path)));
 	}
 	
+	public TermDocPair[] readDocs(int[] docID, String[] path) throws IOException {
+		LinkedList<TermDocPair> pairsList = new LinkedList<>();
+		for (int i = 0; i < path.length; i++) {
+			TokenScanner tscanner = new TokenScanner(new File(path[i]));
+			String token = tscanner.getNextToken();
+			while (!token.equals("")) {
+				pairsList.add(new TermDocPair(token, docID[i], 1));
+				token = tscanner.getNextToken();
+			}
+			
+		}
+		TermDocPair[] arr = pairsList.toArray(new TermDocPair[pairsList.size()]);
+
+		return arr;
+	}
+	
 	
 	/**
 	 * merges the frequency of the termdoc pair with the same term.
-	 * @param arr: a sorted array of term doc pair
-	 * @return merged array
+	 * @param arr: an array of term doc pair
+	 * @return a sorted and merged array
 	 */
 	public TermDocPair[] mergeSortedList(TermDocPair[] arr) {
+		Arrays.sort(arr);
 		LinkedList<TermDocPair> pairsList = new LinkedList<>();
 		if (arr.length==0)
 			return new TermDocPair[0];
@@ -135,39 +151,29 @@ public class Indexer {
 			return new LinkedList<>();
 		//take the first term and make the initial result list
 		LinkedList<DocFreq> results = new LinkedList<>();
-		LinkedList<DocFreq> termResult = invertedList.getListOf(terms[0]);
-		for (DocFreq docFreq : termResult) {
-			results.add(new DocFreq(docFreq.docID, docFreq.freq));
+		for (int i = 0; i < terms.length; i++) {
+			LinkedList<DocFreq> termResult = invertedList.getListOf(terms[i]);
+			for (DocFreq docFreq : termResult) {
+				results.add(new DocFreq(docFreq.docID, docFreq.freq));
+			}
 		}
 		
-		
-		//merge the next terms
-		for (int i = 1; i < terms.length; i++) {
-			termResult = invertedList.getListOf(terms[i]);
-			Iterator<DocFreq> it1 = results.iterator();
-			if (!it1.hasNext())
-				return new LinkedList<>();
-			DocFreq df1 = it1.next();
-			for (DocFreq df2 : termResult) {
-				
-				while (it1.hasNext() && df1.docID<df2.docID) {
-					it1.remove();
-					df1 = it1.next();
-				}
-				
-				if ((!it1.hasNext()) && df1.docID<df2.docID) {
-					it1.remove();
-					break;
-				}
-				
-				if (df1.docID==df2.docID) {
-					df1.freq += df2.freq;
-					if (it1.hasNext())
-						df1 = it1.next();
-					else
-						break;
-				}
+		return results;
+	}
+	
+	public LinkedList<DocFreq> resultOfTheSearch(String[] terms, DocFreq[] partialResults){
+		Arrays.sort(partialResults);
+		int counter = 1;
+		LinkedList<DocFreq> results = new LinkedList<>();
+		for (int i = 1; i < partialResults.length; i++) {
+			if (partialResults[i].docID==partialResults[i-1].docID) {
+				counter++;
+				partialResults[i].freq += partialResults[i-1].freq;
 			}
+			else
+				counter=1;
+			if (counter==terms.length)
+				results.add(partialResults[i]);
 		}
 		return results;
 	}

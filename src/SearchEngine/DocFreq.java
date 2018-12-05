@@ -10,7 +10,7 @@ public class DocFreq implements Comparable<DocFreq> {
 	}
 	@Override
 	public int compareTo(DocFreq o) {
-		return this.freq-o.freq;
+		return this.docID-o.docID;
 	}
 	
 	
