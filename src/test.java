@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.hadoop.io.IntWritable;
@@ -46,20 +47,21 @@ public class test {
 		String query = "rectangular panels and for rectangular";
 		String[] queryTerms = new TokenScanner(query).getAllTokens();
 		LinkedList<DocFreq> results = indexer.search(queryTerms);
+		results = indexer.resultOfTheSearch(queryTerms, results.toArray(new DocFreq[0]));
 		for (DocFreq docFreq : results) {
 			System.out.println(docFreq.docID + "    " + docFreq.freq);
 		}
 		
-		System.out.println("writing index");
-		indexer.saveToFile("index.txt");
-		indexer = Indexer.loadFromFile("index.txt");
-		
-		System.out.println("searching 2");
-		 query = "rectangular panels and for rectangular";
-		queryTerms = new TokenScanner(query).getAllTokens();
-		results = indexer.search(queryTerms);
-		for (DocFreq docFreq : results) {
-			System.out.println(docFreq.docID + "    " + docFreq.freq);
-		}
+//		System.out.println("writing index");
+//		indexer.saveToFile("index.txt");
+//		indexer = Indexer.loadFromFile("index.txt");
+//		
+//		System.out.println("searching 2");
+//		 query = "rectangular panels and for rectangular";
+//		queryTerms = new TokenScanner(query).getAllTokens();
+//		results = indexer.search(queryTerms);
+//		for (DocFreq docFreq : results) {
+//			System.out.println(docFreq.docID + "    " + docFreq.freq);
+//		}
     }
 }
