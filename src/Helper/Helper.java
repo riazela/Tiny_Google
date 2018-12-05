@@ -1,12 +1,33 @@
 package Helper;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+
+import SearchEngine.Indexer;
 
 public class Helper {
-	Socket masterSocket;
-	int ID;
-	int port;
+	static Socket masterSocket;
+	static ServerSocket socket;
+	static int ID;
+	static String ip;
+	static int portM;
+	static int portH;
+	static String[] ipList;
+	static int[] portList;
+	static String[] othersAddr;
+	private static BufferedReader inputSteam;
+	private static OutputStreamWriter outputStream;
+	private static BufferedReader[] inputSteamList;
+	private static OutputStreamWriter[] outputStreamList;
 	
+	private static Indexer indexer = new Indexer();
+	private static boolean waitingForMaster = true;
+	private static boolean waitingForOtherHelper = true;
 	
 	
 	public static void main(String[] args) {
@@ -14,27 +35,187 @@ public class Helper {
 		      System.err.println("Usage: Helper <Master Listening Port>");
 		      System.exit(-1);
 		    }
-		int port = Integer.parseInt(args[0]);
+		String[] ipPort = args[0].split(":");
+		ip = ipPort[0];
+		portM = Integer.parseInt(ipPort[1]);
+		listenForMaster();
+		
 	}
 	
 	/**
 	 * This method waits for a master to connect and then creates an instance of Helper using its socket
 	 * @param port
 	 */
-	public static void listenForMaster(int port) {
+	public static void listenForMaster() {
+		
+		try {
+			socket = new ServerSocket(portM);
+			System.out.println("created");
+		} catch (NumberFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			masterSocket = socket.accept();
+			System.out.println("accepted");
+			inputSteam = new BufferedReader( 
+					new InputStreamReader(masterSocket.getInputStream()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		try {
+			outputStream = new OutputStreamWriter(masterSocket.getOutputStream());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String cmd;
+		try {
+			//
+			cmd = inputSteam.readLine();
+			System.out.println(cmd);
+			String[] list = cmd.split(" ");
+			
+			setup(list);
+			
+			//listen for others
+			listenForOthers();
+			
+			// ack to master
+			sendMasterAck();
+			
+			//get connect cmd from master to connect
+			cmd = inputSteam.readLine();
+			
+			//connect to others with greater ID than us
+			if(cmd.equals("connect")) {
+				connectToOthers();
+			}
+			
+			sendMasterAck();
+			
+			
+			//get index cmd from master
+			
+			
+			//send to others
+			
+			
+			
+			
+			
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		
 	}
+	public static void sendMasterAck() {
+		try {
+			outputStream.write("ok\n");
+			outputStream.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
-	public Helper(Socket masterSocket) {
+	public static void setup(String[] list) {
 		//TODO: get our ID
 		//TODO: get our port
 		//TODO: get the list of other IP Addresses and their id and ports
 		//TODO: listen to your own port 
-		//TODO: connect to those helpers that have ID greater than us
-	}
-	
-	
-	public void someHelperConnected(Socket helperSocket) {
+		ipList = new String[list.length];
+		portList = new int[list.length];
+		for (int i = 0; i < list.length; i++) {
+			String[] str = list[i].split(":");
+			ipList[i] = str[0];
+			portList[i] = Integer.parseInt(str[2]);
+			if(Integer.parseInt(str[1]) == portM) {
+				ID = i;
+				portH = portList[i];
+			}
+		}
+		System.out.println("Helper" + ID +" listeing @ " + portH);
+		
 		
 	}
+	
+	
+	public static void listenForOthers() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+				ServerSocket serverSocket;
+				try {
+					 serverSocket = new ServerSocket(portH);
+					 serverSocket.setSoTimeout(1000);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+					
+				while (waitingForOtherHelper) {
+					Socket s;
+					try {
+						s = serverSocket.accept();
+						BufferedReader in = new BufferedReader( 
+								new InputStreamReader(s.getInputStream())); 
+						String connector = in.readLine();
+						System.out.println("Helper" +connector +" connected to Helper" + ID);
+					}
+					catch (SocketTimeoutException e){
+						continue;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+				}
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		t.start();
+		
+	}
+	
+	public static void connectToOthers() {
+		//TODO: connect to those helpers that have ID greater than us
+		inputSteamList= new BufferedReader[portList.length]; 
+		outputStreamList = new OutputStreamWriter[portList.length];
+		
+		for (int i = 0; i < portList.length; i++) {
+			if(i > ID) {
+				try {
+					Socket s = new Socket(ipList[i], portList[i]);
+					inputSteamList[i] = new BufferedReader( 
+							new InputStreamReader(s.getInputStream())); 
+					outputStreamList[i] = new OutputStreamWriter(s.getOutputStream());
+					outputStreamList[i].write(ID+"\n");
+					outputStreamList[i].flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("cannot connect to " + ipList[i] +":"+ String.valueOf(portList[i]));
+					e.printStackTrace();
+				}
+				
+			}
+		}
+	}
+	
+	
+	public static void indexDoc(){
+		
+	}
+	
 }

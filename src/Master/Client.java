@@ -109,7 +109,7 @@ public class Client {
 			String str = "";
 			switch (messageParts[0]) {
 			case "indexdir":{
-				str = QueryManager.indexDir(messageParts[1]);
+				str = Master.indexDir(messageParts[1]);
 				str = "directory indexed: \n" + str;
 				str = str + "\n";
 				outputStream.write(str);
@@ -117,7 +117,7 @@ public class Client {
 				break;
 			}
 			case "indexdoc":{
-				str = QueryManager.indexDoc(messageParts[1]);
+				str = Master.indexDoc(messageParts[1]);
 				str = "document indexed: \n" + str;
 				str = str + "\n";
 				outputStream.write(str);
@@ -126,7 +126,7 @@ public class Client {
 			}
 			case "search":{
 				String query = messagestr.replace("search ", "");
-				str = QueryManager.search(query);
+				str = Master.search(query);
 				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
