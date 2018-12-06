@@ -112,7 +112,7 @@ public class Server {
 			case "indexdir":{
 				str = Master.indexDir(messageParts[1]);
 				str = "directory " + str + " indexed \n";
-				str = str + "\n";
+				str = str + "#\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
@@ -120,7 +120,7 @@ public class Server {
 			case "indexdoc":{
 				str = Master.indexDoc(messageParts[1]);
 				str = "document " + str + " indexed \n";
-				str = str + "\n";
+				str = str + "#\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
@@ -128,14 +128,15 @@ public class Server {
 			case "search":{
 				String query = messagestr.replace("search ", "");
 				str = Master.search(query);
-				str = str + "\n";
+				str = str + "#\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;
 			}
 			case "reset":{
+				System.out.println("reset command received");
 				Master.reset();
-				str = "Msater reset done" + "\n";
+				str = "Msater reset done" + "\n#\n";
 				outputStream.write(str);
 				outputStream.flush();
 				break;

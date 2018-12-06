@@ -24,14 +24,10 @@ import SearchEngine.TokenScanner;
 public class Master {
 	private static Hashtable<Integer, String> ID2Doc = new Hashtable<Integer,String>();
 	private static Hashtable<String,Integer> Doc2ID = new Hashtable<String,Integer>();
-	private static Hashtable<Integer,Integer> ID2Port = new Hashtable<Integer,Integer>();
 	private static int i = -1;
 	private static BufferedReader[] inputStreamList;
 	private static OutputStreamWriter[] outputStreamList;
-	private static Socket[] sockets;
 	private static int numOfHelpers;
-	private static Hashtable<Integer, String[]> Helper2Doc = new Hashtable<Integer, String[]>();
-	private static Hashtable<Integer, Integer> Doc2Helper = new Hashtable<Integer, Integer>();
 	private static Hashtable<Integer,ArrayList<Integer>> AssignedList;
 	private static LinkedList<DocFreq> allPairs = new LinkedList<>();
 
@@ -174,11 +170,15 @@ public class Master {
 	}
 	
 	public static void getFromHelpers() {
+		allPairs.clear();
 		for (int i = 0; i < inputStreamList.length; i++) {
 			try {
 				String str = inputStreamList[i].readLine();
-				String[] strArr = str.split(" ");
 				
+				if (!str.contains(":"))
+					continue;
+				
+				String[] strArr = str.split("\\s+");
 				for (int t = 0; t < strArr.length; t++) {
 					String[] docfreq = strArr[t].split(":");
 					int doc = Integer.parseInt(docfreq[0]);

@@ -31,11 +31,8 @@ public class ClientSample {
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("Enter command (indexdir/indexdoc/search): ");
 			String cmd = scanner.nextLine() + "\n";
-			String[] cmdParts = cmd.split(" ");
+			String[] cmdParts = cmd.split("\\s+");
 			String str = " ";
-			
-			
-			
 			if (cmdParts[0].equals("indexdir")) {
 				if(cmdParts.length < 2) {
 					System.err.println("Not enough arguments!");
@@ -47,11 +44,10 @@ public class ClientSample {
 				}
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
-				
 			}
 			else if (cmdParts[0].equals("indexdoc"))
 			{
@@ -65,7 +61,7 @@ public class ClientSample {
 				}
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
@@ -83,7 +79,7 @@ public class ClientSample {
 				}
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
@@ -94,20 +90,21 @@ public class ClientSample {
 				closed = true;				
 			}
 			else if (cmdParts[0].equals("reset"))
-			{
-				closed = true;		
+			{	
+				System.out.println("sending reset command");
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
-			}else if (cmdParts[0].equals("save"))
+			}
+			else if (cmdParts[0].equals("save"))
 			{
 				closed = true;		
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
@@ -117,7 +114,7 @@ public class ClientSample {
 				closed = true;		
 				out.write(cmd);
 				out.flush();
-				while(!str.equals("")) {
+				while(!str.equals("#")) {
 					str = in.readLine();
 					System.out.println(str);
 				}
