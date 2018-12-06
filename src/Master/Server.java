@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Scanner;
 
-public class Client {
-	public static ArrayList<Client> allClients = new ArrayList<Client>();
+public class Server {
+	public static ArrayList<Server> allClients = new ArrayList<Server>();
 	private static boolean waitingForNewClients = true;
 	
 		
@@ -39,7 +39,7 @@ public class Client {
 					try {
 						s = serverSocket.accept();
 						System.out.println("one client connected");
-						allClients.add(new Client(s));
+						allClients.add(new Server(s));
 					}
 					catch (SocketTimeoutException e){
 						continue;
@@ -61,7 +61,7 @@ public class Client {
 	
 	public static void stopEverything() {
 		waitingForNewClients = false;
-		for (Client c: allClients) {
+		for (Server c: allClients) {
 			c.close();
 		}
 	}
@@ -72,7 +72,7 @@ public class Client {
 	private OutputStreamWriter outputStream;
 	
 	
-	public Client(Socket socket) throws IOException {
+	public Server(Socket socket) throws IOException {
 		this.socket = socket;
 		
 		socket.setSoTimeout(1000);
@@ -85,10 +85,10 @@ public class Client {
 			@Override
 			public void run() {
 				try {
-					Client.this.listen();
+					Server.this.listen();
 				} catch (IOException e) {
 					e.printStackTrace();
-					Client.this.close();
+					Server.this.close();
 				}
 			}
 		});

@@ -96,8 +96,22 @@ public class Helper {
 			
 			sendMasterAck();
 			
-			
+			// ############## As of here make it in a loop!!!!!!
 			//get index cmd from master
+			while(true) {
+				cmd = inputSteam.readLine();
+				if(cmd.equals("index")) {
+					String str = inputSteam.readLine();
+					String strArr[] = str.split(" ");
+					for (int i = 0; i < strArr.length; i++) {
+						
+					}
+
+				}
+
+			}
+			
+			
 			
 			
 			//send to others

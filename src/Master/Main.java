@@ -48,7 +48,7 @@ public class Main {
 		
 		System.out.println("Master got setup Ack from helpers");
 		
-		Master.issueConnect();
+		Master.broadcast("connect");
 		
 		System.out.println("Master issued connect to helpers");
 		
@@ -59,7 +59,7 @@ public class Main {
 		
 		System.out.println("Master got connection Ack from helpers");
 		
-		Client.waitForClient(clientPort);
+		Server.waitForClient(clientPort);
 		
 		
 		

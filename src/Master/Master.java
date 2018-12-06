@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -27,6 +28,10 @@ public class Master {
 	private static BufferedReader[] inputSteamList;
 	private static OutputStreamWriter[] outputStreamList;
 	private static Socket[] sockets;
+	private static int numOfHelpers;
+	private static Hashtable<Integer, String[]> Helper2Doc = new Hashtable<Integer, String[]>();
+	private static Hashtable<Integer, Integer> Doc2Helper = new Hashtable<Integer, Integer>();
+	private static ArrayList<Integer>[] DocAssignmentList;
 	
 	
 	private static Indexer indexer = new Indexer();
@@ -99,8 +104,7 @@ public class Master {
 					ID2Doc.put(id, docsFile[i].getName());
 					Doc2ID.put(docsFile[i].getName(), id);
 				}
-				else
-					return "Directory already indexed!";
+
 			}
 			
 			
@@ -142,6 +146,8 @@ public class Master {
 	public static void connectToHelpers(String[] list) {
 		inputSteamList= new BufferedReader[list.length]; 
 		outputStreamList = new OutputStreamWriter[list.length];
+		numOfHelpers = list.length;
+		
 		String[] ipPortPort;
 		for (int i = 0; i < list.length; i++) {
 			ipPortPort = list[i].split(":");
@@ -190,16 +196,57 @@ public class Master {
 	}
 	
 	
-	public static void issueConnect() {
+	public static void broadcast(String cmd) {
 		for (int i = 0; i < outputStreamList.length; i++) {
 			try {
-				outputStreamList[i].write("connect\n");
+				outputStreamList[i].write(cmd+"\n");
 				outputStreamList[i].flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void sendToHelper(int id, String msg) {
+		try {
+			outputStreamList[id].write(msg+"\n");
+			outputStreamList[id].flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void issueIndex(String path) {
+		//assign docs to helpers in RR fashion
+		for (int i = 0; i < numOfHelpers; i++) {
+			
+			DocAssignmentList[i] = new ArrayList<Integer>();
+		}
+		
+		for(Integer key: ID2Doc.keySet()) {
+			for (int i = 0; i < numOfHelpers; i++) {
+				if(key % numOfHelpers == i) {
+					DocAssignmentList[i].add(key);
+				}	
+			}
+		}
+		
+		broadcast("index");
+		
+		for (int i = 0; i < numOfHelpers; i++) {
+			String str = "";
+			for (int k = 0; k < DocAssignmentList[i].size(); k++) {
+				str = str + DocAssignmentList[i].get(k).toString() + ":" 
+							+ path +ID2Doc.get(DocAssignmentList[i].get(k)) + " ";
+				
+			}
+			
+			sendToHelper(i, str);
+			
+		}
+		
 	}
 	
 }
