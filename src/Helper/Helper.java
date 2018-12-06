@@ -19,7 +19,6 @@ public class Helper {
 	static Socket masterSocket;
 	static ServerSocket socket;
 	static int ID;
-	static String ip;
 	static int portM;
 	static int portH;
 	static String[] ipList;
@@ -43,9 +42,7 @@ public class Helper {
 		      System.err.println("Usage: Helper <Master Listening Port>");
 		      System.exit(-1);
 		    }
-		String[] ipPort = args[0].split(":");
-		ip = ipPort[0];
-		portM = Integer.parseInt(ipPort[1]);
+		portM = Integer.parseInt(args[0]);
 		listenForMaster();
 		
 	}
