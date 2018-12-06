@@ -118,6 +118,8 @@ public class Helper {
 					sendToOthers();
 					sendMasterAck();
 				} else if (cmd.equals("reduce")) {
+					System.out.println("received reduce command");
+					allPairs = new LinkedList<>();
 					addOwnPairsToAll();
 					getFromOthers();
 					mergeAllTogether();
