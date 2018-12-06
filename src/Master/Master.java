@@ -166,6 +166,10 @@ public class Master {
 					  + String.valueOf(docFreq.freq) + "\n";
 		}
 		
+		if (sortedResults.length==0) {
+			str += "\n";
+		}
+		
 		return str;
 	}
 	
@@ -174,6 +178,7 @@ public class Master {
 			try {
 				String str = inputStreamList[i].readLine();
 				String[] strArr = str.split(" ");
+				
 				for (int t = 0; t < strArr.length; t++) {
 					String[] docfreq = strArr[t].split(":");
 					int doc = Integer.parseInt(docfreq[0]);

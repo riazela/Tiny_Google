@@ -80,7 +80,7 @@ public class Helper {
 			cmd = inputSteam.readLine();
 			System.out.println(cmd);
 			String[] list = cmd.split(" ");
-
+			System.out.println("number of helpers is "+list.length );
 			setup(list);
 
 			// listen for others
@@ -112,6 +112,7 @@ public class Helper {
 						String[] idDoc = strArr[i].split(":");
 						docID[i] = Integer.parseInt(idDoc[0]);
 						path[i] = idDoc[1];
+						System.out.println("indexing " + docID[i]+ " " + path[i]);
 					}
 
 					indexOwnPart(docID, path);
@@ -149,10 +150,16 @@ public class Helper {
 
 	private static void search(String str) throws IOException {
 		LinkedList<DocFreq> partialResult = indexer.search((new TokenScanner(str)).getAllTokens());
+		System.out.println(partialResult.size());
+		String debugstr = "";
 		for (DocFreq docFreq : partialResult) {
 			outputStream.write(docFreq.docID + ":" + docFreq.freq + " ");
+			debugstr += docFreq.docID + ":" + docFreq.freq + " ";
 		}
 		outputStream.write("\n");
+		outputStream.flush();
+		System.out.println("sent the result");
+		System.out.println(debugstr);
 	}
 
 	private static void mergeAllTogether() {
@@ -160,19 +167,22 @@ public class Helper {
 		TermDocPair[] allPairsArr = allPairs.toArray(new TermDocPair[allPairs.size()]);
 		allPairsArr = indexer.mergeSortedList(allPairsArr);
 		indexer.addToIndex(allPairsArr);
+		System.out.println("allpairs added to index");
+		System.out.println(allPairsArr.length);
 	}
 
 	public static void indexOwnPart(int[] docID, String[] path) {
 
 		try {
 			ownPairs = indexer.readDocs(docID, path);
+			System.out.println("number of own pairs "+ ownPairs.length);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		ownPairs = indexer.mergeSortedList(ownPairs);
-
+		System.out.println("number of own pairs after merge "+ ownPairs.length);
 //		for (int i = 0; i < pairs.length; i++) {
 //			System.out.println(pairs[i].term + " in doc" + pairs[i].doc +": "+ pairs[i].freq);
 //		}
@@ -216,10 +226,15 @@ public class Helper {
 		String str = "";
 
 		for (int i = 0; i < outputStreamList.length; i++) {
+			str = "";
 			for (int k = 0; k < ownPairs.length; k++) {
-				if (ownPairs[k].term.hashCode() % numOfHelpers == i) {
-					str = str + ownPairs[k].term + ":" + String.valueOf(ownPairs[k].doc) + ":"
-							+ String.valueOf(ownPairs[k].freq) + " ";
+				
+				if (Math.abs(ownPairs[k].term.hashCode()) % numOfHelpers == i) {
+					if (ownPairs[k].term.equals("aircraft")) {
+						System.out.println(Math.abs(ownPairs[k].term.hashCode()) % numOfHelpers);
+					}
+					str = str + ownPairs[k].term + ":" + ownPairs[k].doc + ":"
+							+ ownPairs[k].freq + " ";
 				}
 			}
 
@@ -265,7 +280,7 @@ public class Helper {
 
 	public static void addOwnPairsToAll() {
 		for (int i = 0; i < ownPairs.length; i++) {
-			if (ownPairs[i].term.hashCode() % numOfHelpers == ID)
+			if (Math.abs(ownPairs[i].term.hashCode()) % numOfHelpers == ID)
 				allPairs.add(ownPairs[i]);
 		}
 		ownPairs = null;
