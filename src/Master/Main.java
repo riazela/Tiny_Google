@@ -56,10 +56,14 @@ public class Main {
 			System.out.println("Helpers connection failed!");
 			return;
 		}
-		
 		System.out.println("Master got connection Ack from helpers");
 		
+//		Master.issueIndex("docs/");
+		
 		Server.waitForClient(clientPort);
+		
+
+		
 		
 		
 		

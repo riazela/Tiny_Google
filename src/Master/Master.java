@@ -31,7 +31,7 @@ public class Master {
 	private static int numOfHelpers;
 	private static Hashtable<Integer, String[]> Helper2Doc = new Hashtable<Integer, String[]>();
 	private static Hashtable<Integer, Integer> Doc2Helper = new Hashtable<Integer, Integer>();
-	private static ArrayList<Integer>[] DocAssignmentList;
+	private static Hashtable<Integer,ArrayList<Integer>> AssignedList;
 	
 	
 	private static Indexer indexer = new Indexer();
@@ -87,6 +87,7 @@ public class Master {
 			
 			File dir = new File(dirPath);
 			String str = "";
+			String pathSlash = dirPath + "/";
 			
 			if (!dir.exists() || !dir.isDirectory()){
 				System.err.println("documents path is wrong!");
@@ -94,7 +95,6 @@ public class Master {
 			}
 			
 			File[] docsFile = dir.listFiles();
-			System.out.println("Start indexing... "  + docsFile.length );
 			Integer id = 0;
 			for (int i = 0; i < docsFile.length; i++) {
 				if (!ID2Doc.isEmpty()) {
@@ -107,21 +107,24 @@ public class Master {
 
 			}
 			
+			System.out.println("Master issuing index for "  + docsFile.length + " docs to helpers"+  );
+//			
+//			for(Integer key: ID2Doc.keySet()) {
+//				
+//				TermDocPair[] pairs = null;
+//				try {
+//					pairs = indexer.readDoc(key, dirPath +"/"+ ID2Doc.get(key));
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				pairs = indexer.mergeSortedList(pairs);
+//				indexer.addToIndex(pairs);
+//				System.out.println(key);
+//				str = str + key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
+//			}
 			
-			for(Integer key: ID2Doc.keySet()) {
-				
-				TermDocPair[] pairs = null;
-				try {
-					pairs = indexer.readDoc(key, dirPath +"/"+ ID2Doc.get(key));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				pairs = indexer.mergeSortedList(pairs);
-				indexer.addToIndex(pairs);
-				System.out.println(key);
-				str = str + key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
-			}
+			issueIndex(pathSlash);
 			
 			return str;
 		}
@@ -220,32 +223,36 @@ public class Master {
 	
 	public static void issueIndex(String path) {
 		//assign docs to helpers in RR fashion
-		for (int i = 0; i < numOfHelpers; i++) {
-			
-			DocAssignmentList[i] = new ArrayList<Integer>();
-		}
+		AssignedList =  new Hashtable<Integer,ArrayList<Integer>>();
 		
-		for(Integer key: ID2Doc.keySet()) {
-			for (int i = 0; i < numOfHelpers; i++) {
+		for (int i = 0; i < numOfHelpers; i++) {
+			ArrayList<Integer> arr = new ArrayList<Integer>();
+			for(Integer key: ID2Doc.keySet()) {
 				if(key % numOfHelpers == i) {
-					DocAssignmentList[i].add(key);
+					arr.add(key);
 				}	
 			}
+			AssignedList.put(i,arr);
 		}
 		
 		broadcast("index");
 		
-		for (int i = 0; i < numOfHelpers; i++) {
+		for (Integer i: AssignedList.keySet()) {
 			String str = "";
-			for (int k = 0; k < DocAssignmentList[i].size(); k++) {
-				str = str + DocAssignmentList[i].get(k).toString() + ":" 
-							+ path +ID2Doc.get(DocAssignmentList[i].get(k)) + " ";
+			for (int k = 0; k < AssignedList.get(i).size(); k++) {
+				str = str + AssignedList.get(i).get(k).toString() + ":" 
+						+ path +ID2Doc.get(AssignedList.get(i).get(k)) + " ";
 				
 			}
-			
 			sendToHelper(i, str);
 			
 		}
+		
+		if (!Master.getHelpersAck()) {
+			System.out.println("Helpers index failed!");
+			return;
+		}	
+		System.out.println("Master got index Ack from helpers");
 		
 	}
 	

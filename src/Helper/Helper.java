@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 import SearchEngine.Indexer;
+import SearchEngine.TermDocPair;
 
 public class Helper {
 	static Socket masterSocket;
@@ -103,10 +104,16 @@ public class Helper {
 				if(cmd.equals("index")) {
 					String str = inputSteam.readLine();
 					String strArr[] = str.split(" ");
+					int [] docID = new int[strArr.length];
+					String[] path = new String[strArr.length];
 					for (int i = 0; i < strArr.length; i++) {
-						
+						String[] idDoc = strArr[i].split(":");
+						docID[i] = Integer.parseInt(idDoc[0]);
+						path[i] =  idDoc[1];
 					}
 
+					index(docID, path);
+					sendMasterAck();
 				}
 
 			}
@@ -128,6 +135,22 @@ public class Helper {
 		}
 		
 		
+		
+	}
+	
+	public static void index(int[] docID, String[] path) {
+		
+		TermDocPair[] pairs = null;
+		try {
+			pairs = indexer.readDocs(docID, path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		pairs = indexer.mergeSortedList(pairs);	
+		for (int i = 0; i < pairs.length; i++) {
+			System.out.println(pairs[i].term + " in doc" + pairs[i].doc +": "+ pairs[i].freq);
+		}
 		
 	}
 	public static void sendMasterAck() {
