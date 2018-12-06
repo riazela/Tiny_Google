@@ -3,7 +3,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.hadoop.io.IntWritable;
@@ -42,24 +44,38 @@ public class test {
 			System.out.println(i);
 		}
 		
-		System.out.println("searching 1");
+		
+		//how to search
+		System.out.println("searching");
 		String query = "rectangular panels and for rectangular";
 		String[] queryTerms = new TokenScanner(query).getAllTokens();
 		LinkedList<DocFreq> results = indexer.search(queryTerms);
-		for (DocFreq docFreq : results) {
+		results = indexer.resultOfTheSearch(queryTerms, results.toArray(new DocFreq[0]));
+		
+		//how to sort final results descending
+		DocFreq[] sortedResults = results.toArray(new DocFreq[0]);
+		Arrays.sort(sortedResults, new Comparator<DocFreq>() {
+			@Override
+			public int compare(DocFreq o1, DocFreq o2) {
+				return o2.freq-o1.freq;
+			}
+		});
+		
+		//printing the final result
+		for (DocFreq docFreq : sortedResults) {
 			System.out.println(docFreq.docID + "    " + docFreq.freq);
 		}
 		
-		System.out.println("writing index");
-		indexer.saveToFile("index.txt");
-		indexer = Indexer.loadFromFile("index.txt");
-		
-		System.out.println("searching 2");
-		 query = "rectangular panels and for rectangular";
-		queryTerms = new TokenScanner(query).getAllTokens();
-		results = indexer.search(queryTerms);
-		for (DocFreq docFreq : results) {
-			System.out.println(docFreq.docID + "    " + docFreq.freq);
-		}
+//		System.out.println("writing index");
+//		indexer.saveToFile("index.txt");
+//		indexer = Indexer.loadFromFile("index.txt");
+//		
+//		System.out.println("searching 2");
+//		 query = "rectangular panels and for rectangular";
+//		queryTerms = new TokenScanner(query).getAllTokens();
+//		results = indexer.search(queryTerms);
+//		for (DocFreq docFreq : results) {
+//			System.out.println(docFreq.docID + "    " + docFreq.freq);
+//		}
     }
 }

@@ -19,12 +19,14 @@ public class HadoopIndexCombiner extends Reducer<Text, TermFreqWritable, Text, T
 
 		TermFreqWritable lastValue = null;
 		int freq = 0;
+		TermFreqWritable tfw = new TermFreqWritable();
 		for (TermFreqWritable value : values) {
 			if (lastValue != null) {
 				if (lastValue.getTerm().equals(value.getTerm())) {
 					freq += value.getFreq().get();
 				} else {
-					context.write(word, new TermFreqWritable(lastValue.getTerm(), new IntWritable(freq)));
+					tfw.set(lastValue.getTerm().toString(), freq);
+					context.write(word, tfw);
 					freq = value.getFreq().get();
 				}
 			} else
@@ -35,7 +37,8 @@ public class HadoopIndexCombiner extends Reducer<Text, TermFreqWritable, Text, T
 		}
 
 		if (lastValue != null) {
-			context.write(word, new TermFreqWritable(lastValue.getTerm(), new IntWritable(freq)));
+			tfw.set(lastValue.getTerm().toString(), freq);
+			context.write(word, tfw);
 		}
 
 	}

@@ -21,8 +21,11 @@ public class HadoopIndexMapper extends Mapper<LongWritable, Text, Text, TermFreq
         int airTemperature;
         TokenScanner tokenizer= new TokenScanner(line);
         String word = tokenizer.getNextToken();
+        Text wordText = new Text();
+        TermFreqWritable termFreqWritable = new TermFreqWritable(documentName, new IntWritable(1));
         while (!word.equals("")){
-        	context.write(new Text(word), new TermFreqWritable(documentName, new IntWritable(1)));
+        	wordText.set(word);
+        	context.write(wordText, termFreqWritable);
 	        word = tokenizer.getNextToken();
         }
     }
