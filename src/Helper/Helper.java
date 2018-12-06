@@ -34,14 +34,8 @@ public class Helper {
 	private static boolean waitingForMaster = true;
 	private static boolean waitingForOtherHelper = true;
 	private static TermDocPair[] ownPairs;
-<<<<<<< HEAD
 	private static LinkedList<TermDocPair> allPairs;
-	
-	
-=======
-	private static LinkedList<TermDocPair> allPairs = new LinkedList<>();
 
->>>>>>> branch 'master' of https://github.com/riazela/Tiny_Google.git
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.err.println("Usage: Helper <Master Listening Port>");
@@ -59,128 +53,113 @@ public class Helper {
 	 * @param port
 	 */
 	public static void listenForMaster() {
-		while (true) {
-			indexer = new Indexer();
-			try {
-				socket = new ServerSocket(portM);
-				System.out.println("created");
-			} catch (NumberFormatException | IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				masterSocket = socket.accept();
-				System.out.println("accepted");
-				inputSteam = new BufferedReader(new InputStreamReader(masterSocket.getInputStream()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				outputStream = new OutputStreamWriter(masterSocket.getOutputStream());
-			} catch (IOException e) {
-				e.printStackTrace();
+
+		indexer = new Indexer();
+		try {
+			socket = new ServerSocket(portM);
+			System.out.println("created");
+		} catch (NumberFormatException | IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			masterSocket = socket.accept();
+			System.out.println("accepted");
+			inputSteam = new BufferedReader(new InputStreamReader(masterSocket.getInputStream()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			outputStream = new OutputStreamWriter(masterSocket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		String cmd;
+		try {
+			//
+			cmd = inputSteam.readLine();
+			System.out.println(cmd);
+			String[] list = cmd.split(" ");
+
+			setup(list);
+
+			// listen for others
+			listenForOthers();
+
+			// ack to master
+			sendMasterAck();
+
+			// get connect cmd from master to connect
+			cmd = inputSteam.readLine();
+
+			// connect to others with greater ID than us
+			if (cmd.equals("connect")) {
+				connectToOthers();
 			}
 
-			String cmd;
-			try {
-				//
+			sendMasterAck();
+
+			// ############## As of here make it in a loop!!!!!!
+			// get index cmd from master
+			while (true) {
 				cmd = inputSteam.readLine();
-				System.out.println(cmd);
-				String[] list = cmd.split(" ");
-
-				setup(list);
-
-				// listen for others
-				listenForOthers();
-
-				// ack to master
-				sendMasterAck();
-
-				// get connect cmd from master to connect
-				cmd = inputSteam.readLine();
-
-				// connect to others with greater ID than us
-				if (cmd.equals("connect")) {
-					connectToOthers();
-				}
-
-				sendMasterAck();
-
-				// ############## As of here make it in a loop!!!!!!
-				// get index cmd from master
-				while (true) {
-					cmd = inputSteam.readLine();
-					if (cmd.equals("index")) {
-						String str = inputSteam.readLine();
-						String strArr[] = str.split(" ");
-						int[] docID = new int[strArr.length];
-						String[] path = new String[strArr.length];
-						for (int i = 0; i < strArr.length; i++) {
-							String[] idDoc = strArr[i].split(":");
-							docID[i] = Integer.parseInt(idDoc[0]);
-							path[i] = idDoc[1];
-						}
-
-						indexOwnPart(docID, path);
-						sendToOthers();
-						sendMasterAck();
-					} else if (cmd.equals("reduce")) {
-						addOwnPairsToAll();
-						getFromOthers();
-						mergeAllTogether();
-						indexer.saveToFile(String.valueOf(ID));
-						sendMasterAck();
-					} else if (cmd.equals("search")) {
-						String str = inputSteam.readLine();
-						search(str);
-					} else if (cmd.equals("reset")) {
-						indexer = new Indexer();
-					} else if (cmd.equals("save")) {
-						String str = inputSteam.readLine();
-						indexer.saveToFile(str);
-					} else if (cmd.equals("laod")) {
-						String str = inputSteam.readLine();
-						indexer = Indexer.loadFromFile(str);
+				if (cmd.equals("index")) {
+					String str = inputSteam.readLine();
+					String strArr[] = str.split(" ");
+					int[] docID = new int[strArr.length];
+					String[] path = new String[strArr.length];
+					for (int i = 0; i < strArr.length; i++) {
+						String[] idDoc = strArr[i].split(":");
+						docID[i] = Integer.parseInt(idDoc[0]);
+						path[i] = idDoc[1];
 					}
+
+					indexOwnPart(docID, path);
+					sendToOthers();
+					sendMasterAck();
+				} else if (cmd.equals("reduce")) {
+					addOwnPairsToAll();
+					getFromOthers();
+					mergeAllTogether();
+					indexer.saveToFile(String.valueOf(ID));
+					sendMasterAck();
+				} else if (cmd.equals("search")) {
+					String str = inputSteam.readLine();
+					search(str);
+				} else if (cmd.equals("reset")) {
+					indexer = new Indexer();
+				} else if (cmd.equals("save")) {
+					String str = inputSteam.readLine();
+					indexer.saveToFile(str);
+				} else if (cmd.equals("laod")) {
+					String str = inputSteam.readLine();
+					indexer = Indexer.loadFromFile(str);
 				}
-<<<<<<< HEAD
-				else if(cmd.equals("reduce")) {
+				else if (cmd.equals("reduce")) {
 					allPairs = new LinkedList<>();
 					addOwnPairsToAll();
 					getFromOthers();
 					mergeAllTogether();
 					indexer.saveToFile(String.valueOf(ID));
 					sendMasterAck();
-				} else if(cmd.equals("search")) {
+				} else if (cmd.equals("search")) {
 					String str = inputSteam.readLine();
 					search(str);
-				}
-				else if(cmd.equals("reset")) {
+				} else if (cmd.equals("reset")) {
 					indexer = new Indexer();
-				}
-				else if(cmd.equals("save")) {
+				} else if (cmd.equals("save")) {
 					String str = inputSteam.readLine();
 					indexer.saveToFile(str);
-				}
-				else if(cmd.equals("laod")) {
+				} else if (cmd.equals("laod")) {
 					String str = inputSteam.readLine();
 					indexer = Indexer.loadFromFile(str);
 				}
-
-=======
-			} catch (IOException e) {
-				System.out.println("master Closed");
-				System.exit(0);
->>>>>>> branch 'master' of https://github.com/riazela/Tiny_Google.git
 			}
-<<<<<<< HEAD
-			
-			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-=======
->>>>>>> branch 'master' of https://github.com/riazela/Tiny_Google.git
+			System.out.println("master Closed");
+			System.exit(0);
 		}
+
 	}
 
 	private static void search(String str) throws IOException {
