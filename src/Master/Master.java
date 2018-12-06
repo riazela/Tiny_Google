@@ -107,7 +107,6 @@ public class Master {
 
 			}
 			
-			System.out.println("Master issuing index for "  + docsFile.length + " docs to helpers"+  );
 //			
 //			for(Integer key: ID2Doc.keySet()) {
 //				
@@ -124,9 +123,10 @@ public class Master {
 //				str = str + key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
 //			}
 			
+			System.out.println("Master issues index to helpers");
 			issueIndex(pathSlash);
 			
-			return str;
+			return dirPath;
 		}
 		
 	}
@@ -241,8 +241,7 @@ public class Master {
 			String str = "";
 			for (int k = 0; k < AssignedList.get(i).size(); k++) {
 				str = str + AssignedList.get(i).get(k).toString() + ":" 
-						+ path +ID2Doc.get(AssignedList.get(i).get(k)) + " ";
-				
+						+ path +ID2Doc.get(AssignedList.get(i).get(k)) + " ";			
 			}
 			sendToHelper(i, str);
 			
@@ -253,6 +252,14 @@ public class Master {
 			return;
 		}	
 		System.out.println("Master got index Ack from helpers");
+		
+		broadcast("reduce");
+		
+		if (!Master.getHelpersAck()) {
+			System.out.println("Helpers reduce failed!");
+			return;
+		}	
+		System.out.println("Master got reduce Ack from helpers");
 		
 	}
 	

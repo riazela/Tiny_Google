@@ -1,15 +1,18 @@
 package Helper;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.LinkedList;
 
 import SearchEngine.Indexer;
 import SearchEngine.TermDocPair;
+import SearchEngine.TokenScanner;
 
 public class Helper {
 	static Socket masterSocket;
@@ -20,15 +23,18 @@ public class Helper {
 	static int portH;
 	static String[] ipList;
 	static int[] portList;
+	private static int numOfHelpers;
 	static String[] othersAddr;
 	private static BufferedReader inputSteam;
 	private static OutputStreamWriter outputStream;
-	private static BufferedReader[] inputSteamList;
+	private static BufferedReader[] inputStreamList;
 	private static OutputStreamWriter[] outputStreamList;
 	
 	private static Indexer indexer = new Indexer();
 	private static boolean waitingForMaster = true;
 	private static boolean waitingForOtherHelper = true;
+	private static TermDocPair[] ownPairs;
+	private static LinkedList<TermDocPair> allPairs = new LinkedList<>();
 	
 	
 	public static void main(String[] args) {
@@ -112,7 +118,15 @@ public class Helper {
 						path[i] =  idDoc[1];
 					}
 
-					index(docID, path);
+					indexOwnPart(docID, path);
+					sendToOthers();
+					sendMasterAck();
+				}
+				else if(cmd.equals("reduce")) {
+					addOwnPairsToAll();
+					getFromOthers();
+					mergeAllTogether();
+					indexer.saveToFile(String.valueOf(ID));
 					sendMasterAck();
 				}
 
@@ -138,19 +152,28 @@ public class Helper {
 		
 	}
 	
-	public static void index(int[] docID, String[] path) {
+	private static void mergeAllTogether() {
+		// TODO Auto-generated method stub
+		TermDocPair[] allPairsArr = allPairs.toArray(new TermDocPair[allPairs.size()]);
+		allPairsArr = indexer.mergeSortedList(allPairsArr);
+		indexer.addToIndex(allPairsArr);
+	}
+
+	public static void indexOwnPart(int[] docID, String[] path) {
 		
-		TermDocPair[] pairs = null;
 		try {
-			pairs = indexer.readDocs(docID, path);
+			ownPairs = indexer.readDocs(docID, path);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		pairs = indexer.mergeSortedList(pairs);	
-		for (int i = 0; i < pairs.length; i++) {
-			System.out.println(pairs[i].term + " in doc" + pairs[i].doc +": "+ pairs[i].freq);
-		}
+		
+		ownPairs = indexer.mergeSortedList(ownPairs);	
+		
+		
+//		for (int i = 0; i < pairs.length; i++) {
+//			System.out.println(pairs[i].term + " in doc" + pairs[i].doc +": "+ pairs[i].freq);
+//		}
 		
 	}
 	public static void sendMasterAck() {
@@ -170,6 +193,9 @@ public class Helper {
 		//TODO: listen to your own port 
 		ipList = new String[list.length];
 		portList = new int[list.length];
+		numOfHelpers = list.length;
+		inputStreamList= new BufferedReader[portList.length]; 
+		outputStreamList = new OutputStreamWriter[portList.length];
 		for (int i = 0; i < list.length; i++) {
 			String[] str = list[i].split(":");
 			ipList[i] = str[0];
@@ -184,6 +210,67 @@ public class Helper {
 		
 	}
 	
+	
+	public static void sendToOthers() {
+		String str = "";
+		
+		for (int i = 0; i < outputStreamList.length; i++) {
+			for (int k = 0; k < ownPairs.length; k++) {
+				if(ownPairs[k].term.hashCode() % numOfHelpers == i) {
+					str = str + ownPairs[k].term
+							+ ":" + String.valueOf(ownPairs[k].doc)
+							+ ":" + String.valueOf(ownPairs[k].freq) + " ";			
+				}
+			}
+			
+			try {
+				if(i != ID) {
+					outputStreamList[i].write(str+"\n");
+//					outputStreamList[i].write("dream:1:1 \n");
+					outputStreamList[i].flush();
+				}
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void getFromOthers() {
+		
+		for (int i = 0; i < inputStreamList.length; i++) {
+			if(i != ID) {
+				try {
+					String str = inputStreamList[i].readLine();
+					String[] strArr = str.split(" ");
+					for (int t = 0; t < strArr.length; t++) {
+						String[] termdocfreq = strArr[t].split(":");
+						String term = termdocfreq[0];
+						int doc = Integer.parseInt(termdocfreq[1]);
+						int freq = Integer.parseInt(termdocfreq[2]);
+						TermDocPair newPair = new TermDocPair(term, doc, freq);
+						allPairs.add(newPair);
+					}
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
+		
+	}
+	
+	public static void addOwnPairsToAll() {
+		for (int i = 0; i < ownPairs.length; i++) {
+			if(ownPairs[i].term.hashCode() % numOfHelpers == ID)
+				allPairs.add(ownPairs[i]);
+		}
+	}
+	
+
 	
 	public static void listenForOthers() {
 		Thread t = new Thread(new Runnable() {
@@ -205,8 +292,11 @@ public class Helper {
 						s = serverSocket.accept();
 						BufferedReader in = new BufferedReader( 
 								new InputStreamReader(s.getInputStream())); 
+						OutputStreamWriter out = new OutputStreamWriter(s.getOutputStream());
 						String connector = in.readLine();
 						System.out.println("Helper" +connector +" connected to Helper" + ID);
+						inputStreamList[Integer.parseInt(connector)] = in;
+						outputStreamList[Integer.parseInt(connector)] = out;
 					}
 					catch (SocketTimeoutException e){
 						continue;
@@ -228,15 +318,13 @@ public class Helper {
 	
 	public static void connectToOthers() {
 		//TODO: connect to those helpers that have ID greater than us
-		inputSteamList= new BufferedReader[portList.length]; 
-		outputStreamList = new OutputStreamWriter[portList.length];
 		
 		for (int i = 0; i < portList.length; i++) {
 			if(i > ID) {
 				try {
 					Socket s = new Socket(ipList[i], portList[i]);
-					inputSteamList[i] = new BufferedReader( 
-							new InputStreamReader(s.getInputStream())); 
+					inputStreamList[i]= new BufferedReader( 
+							new InputStreamReader(s.getInputStream()));
 					outputStreamList[i] = new OutputStreamWriter(s.getOutputStream());
 					outputStreamList[i].write(ID+"\n");
 					outputStreamList[i].flush();

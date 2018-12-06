@@ -111,7 +111,7 @@ public class Server {
 			switch (messageParts[0]) {
 			case "indexdir":{
 				str = Master.indexDir(messageParts[1]);
-				str = "directory indexed: \n" + str;
+				str = "directory " + str + " indexed \n";
 				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
@@ -119,7 +119,7 @@ public class Server {
 			}
 			case "indexdoc":{
 				str = Master.indexDoc(messageParts[1]);
-				str = "document indexed: \n" + str;
+				str = "document " + str + " indexed \n";
 				str = str + "\n";
 				outputStream.write(str);
 				outputStream.flush();
