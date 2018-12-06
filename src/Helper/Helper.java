@@ -125,6 +125,7 @@ public class Helper {
 					sendMasterAck();
 				} else if (cmd.equals("search")) {
 					String str = inputSteam.readLine();
+					System.out.println("searching "+str);
 					search(str);
 				} else if (cmd.equals("reset")) {
 					indexer = new Indexer();
@@ -135,25 +136,7 @@ public class Helper {
 					String str = inputSteam.readLine();
 					indexer = Indexer.loadFromFile(str);
 				}
-				else if (cmd.equals("reduce")) {
-					allPairs = new LinkedList<>();
-					addOwnPairsToAll();
-					getFromOthers();
-					mergeAllTogether();
-					indexer.saveToFile(String.valueOf(ID));
-					sendMasterAck();
-				} else if (cmd.equals("search")) {
-					String str = inputSteam.readLine();
-					search(str);
-				} else if (cmd.equals("reset")) {
-					indexer = new Indexer();
-				} else if (cmd.equals("save")) {
-					String str = inputSteam.readLine();
-					indexer.saveToFile(str);
-				} else if (cmd.equals("laod")) {
-					String str = inputSteam.readLine();
-					indexer = Indexer.loadFromFile(str);
-				}
+				
 			}
 		} catch (IOException e) {
 			System.out.println("master Closed");
