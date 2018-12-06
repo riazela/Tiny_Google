@@ -68,9 +68,9 @@ public class TokenScanner {
 				}
 				s = temp[0];
 				
-				s = s.toLowerCase();
 			}
 		}
+		s = s.toLowerCase();
 		return s;
 	}
 	
