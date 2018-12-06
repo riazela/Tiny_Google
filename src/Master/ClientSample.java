@@ -34,17 +34,17 @@ public class ClientSample {
 			String[] cmdParts = cmd.split(" ");
 			String str = " ";
 			
-			if(cmdParts.length < 2) {
-				System.err.println("Not enough arguments!");
-				out.write("close");
-				out.flush();
-				socket.close();
-				System.out.println("Client closed!");
-				return;
-			}
+			
 			
 			if (cmdParts[0].equals("indexdir")) {
-				
+				if(cmdParts.length < 2) {
+					System.err.println("Not enough arguments!");
+					out.write("close");
+					out.flush();
+					socket.close();
+					System.out.println("Client closed!");
+					return;
+				}
 				out.write(cmd);
 				out.flush();
 				while(!str.equals("")) {
@@ -55,7 +55,14 @@ public class ClientSample {
 			}
 			else if (cmdParts[0].equals("indexdoc"))
 			{
-				
+				if(cmdParts.length < 2) {
+					System.err.println("Not enough arguments!");
+					out.write("close");
+					out.flush();
+					socket.close();
+					System.out.println("Client closed!");
+					return;
+				}
 				out.write(cmd);
 				out.flush();
 				while(!str.equals("")) {
@@ -66,6 +73,14 @@ public class ClientSample {
 			}
 			else if (cmdParts[0].equals("search"))
 			{
+				if(cmdParts.length < 2) {
+					System.err.println("Not enough arguments!");
+					out.write("close");
+					out.flush();
+					socket.close();
+					System.out.println("Client closed!");
+					return;
+				}
 				out.write(cmd);
 				out.flush();
 				while(!str.equals("")) {
@@ -77,6 +92,35 @@ public class ClientSample {
 			else if (cmdParts[0].equals("close"))
 			{
 				closed = true;				
+			}
+			else if (cmdParts[0].equals("reset"))
+			{
+				closed = true;		
+				out.write(cmd);
+				out.flush();
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
+			}else if (cmdParts[0].equals("save"))
+			{
+				closed = true;		
+				out.write(cmd);
+				out.flush();
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
+			}
+			else if (cmdParts[0].equals("laod"))
+			{
+				closed = true;		
+				out.write(cmd);
+				out.flush();
+				while(!str.equals("")) {
+					str = in.readLine();
+					System.out.println(str);
+				}
 			}
 			
 		}
