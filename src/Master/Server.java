@@ -133,6 +133,13 @@ public class Server {
 				outputStream.flush();
 				break;
 			}
+			case "reset":{
+				Master.reset();
+				str = "Msater reset done" + "\n";
+				outputStream.write(str);
+				outputStream.flush();
+				break;
+			}
 			case "close":{
 				this.close();
 				return;

@@ -34,7 +34,7 @@ public class Helper {
 	private static boolean waitingForMaster = true;
 	private static boolean waitingForOtherHelper = true;
 	private static TermDocPair[] ownPairs;
-	private static LinkedList<TermDocPair> allPairs = new LinkedList<>();
+	private static LinkedList<TermDocPair> allPairs;
 	
 	
 	public static void main(String[] args) {
@@ -121,6 +121,7 @@ public class Helper {
 					sendMasterAck();
 				}
 				else if(cmd.equals("reduce")) {
+					allPairs = new LinkedList<>();
 					addOwnPairsToAll();
 					getFromOthers();
 					mergeAllTogether();
@@ -143,16 +144,6 @@ public class Helper {
 				}
 
 			}
-			
-			
-			
-			
-			//send to others
-			
-			
-			
-			
-			
 			
 			
 		} catch (IOException e) {

@@ -55,9 +55,9 @@ public class Master {
 		
 	}
 	
-	public static String indexDoc(String docName) {
+	public static String indexDoc(String docPath) {
 		synchronized (indexer) {
-			File docFile = new File(docName);
+			File docFile = new File(docPath);
 			Integer id = 0;
 			String str = "";
 			if (!ID2Doc.isEmpty()) {
@@ -70,18 +70,29 @@ public class Master {
 			else
 				return "Document already indexed!";
 			
-			TermDocPair[] pairs = null;
-			try {
-				pairs = indexer.readDoc(id,  "docs/" + docFile.getName());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			pairs = indexer.mergeSortedList(pairs);
-			indexer.addToIndex(pairs);
-			System.out.println(id);
-			str = id.toString()+ ": "+ ID2Doc.get(id)+ "\n";
-			return str;
+			str = str + id.toString() + ":" + docPath + " ";
+			int hid = id % numOfHelpers;
+			
+			broadcast("index");
+			
+			sendToHelper(hid, str);
+			
+			if (!Master.getHelpersAck()) {
+				System.out.println("Helpers index failed!");
+				return "";
+			}	
+			System.out.println("Master got index Ack from helpers");
+			
+			broadcast("reduce");
+			
+			if (!Master.getHelpersAck()) {
+				System.out.println("Helpers reduce failed!");
+				return "";
+			}	
+			System.out.println("Master got reduce Ack from helpers");
+			
+
+			return docPath;
 		}
 	}
 	
@@ -110,22 +121,6 @@ public class Master {
 
 			}
 			
-		
-//			for(Integer key: ID2Doc.keySet()) {
-//				
-//				TermDocPair[] pairs = null;
-//				try {
-//					pairs = indexer.readDoc(key, dirPath +"/"+ ID2Doc.get(key));
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				pairs = indexer.mergeSortedList(pairs);
-//				indexer.addToIndex(pairs);
-//				System.out.println(key);
-//				str = str + key.toString()+ ": "+ ID2Doc.get(key)+ "\n";
-//			}
-			
 			System.out.println("Master issues index to helpers");
 			issueIndex(pathSlash);
 			
@@ -138,12 +133,6 @@ public class Master {
 		synchronized (indexer) {
 			String str = "";
 			String[] queryTerms = new TokenScanner(query).getAllTokens();
-//			LinkedList<DocFreq> results = indexer.search(queryTerms);
-//			for (DocFreq docFreq : results) {
-//				System.out.println(docFreq.docID + "    " + docFreq.freq);
-//				
-//				str = str + ID2Doc.get(docFreq.docID ) + "    " + docFreq.freq + "\n";
-//			}
 			
 			broadcast("search");
 			
@@ -151,13 +140,6 @@ public class Master {
 				
 				sendToHelper(i, query);
 			}
-			
-			
-			if (!Master.getHelpersAck()) {
-				System.out.println("Helpers search failed!");
-				return "";
-			}	
-			System.out.println("Master got search Ack from helpers");
 			
 			getFromHelpers();
 			str = mergeSearchResult(queryTerms);
@@ -323,6 +305,14 @@ public class Master {
 		System.out.println("Master got reduce Ack from helpers");
 		
 	}
+	
+	public static void reset() {
+	    for (int i = 0; i < outputStreamList.length; i++) {
+	      sendToHelper(i, "reset");
+	    }
+	    ID2Doc = new Hashtable<Integer,String>();
+		Doc2ID = new Hashtable<String,Integer>();
+	  }
 	
 }
 
