@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
+import SearchEngine.DocFreq;
 import SearchEngine.Indexer;
 import SearchEngine.TermDocPair;
 import SearchEngine.TokenScanner;
@@ -18,7 +19,6 @@ public class Helper {
 	static Socket masterSocket;
 	static ServerSocket socket;
 	static int ID;
-	static String ip;
 	static int portM;
 	static int portH;
 	static String[] ipList;
@@ -42,9 +42,7 @@ public class Helper {
 		      System.err.println("Usage: Helper <Master Listening Port>");
 		      System.exit(-1);
 		    }
-		String[] ipPort = args[0].split(":");
-		ip = ipPort[0];
-		portM = Integer.parseInt(ipPort[1]);
+		portM = Integer.parseInt(args[0]);
 		listenForMaster();
 		
 	}
@@ -128,6 +126,20 @@ public class Helper {
 					mergeAllTogether();
 					indexer.saveToFile(String.valueOf(ID));
 					sendMasterAck();
+				} else if(cmd.equals("search")) {
+					String str = inputSteam.readLine();
+					search(str);
+				}
+				else if(cmd.equals("reset")) {
+					indexer = new Indexer();
+				}
+				else if(cmd.equals("save")) {
+					String str = inputSteam.readLine();
+					indexer.saveToFile(str);
+				}
+				else if(cmd.equals("laod")) {
+					String str = inputSteam.readLine();
+					indexer = Indexer.loadFromFile(str);
 				}
 
 			}
@@ -151,6 +163,15 @@ public class Helper {
 		
 		
 	}
+	
+	private static void search(String str) throws IOException {
+		LinkedList<DocFreq> partialResult = indexer.search((new TokenScanner(str)).getAllTokens());
+		for (DocFreq docFreq : partialResult) {
+			outputStream.write(docFreq.docID + ":" + docFreq.freq + " ");
+		}
+		outputStream.write("\n");
+	}
+	
 	
 	private static void mergeAllTogether() {
 		// TODO Auto-generated method stub
@@ -268,6 +289,7 @@ public class Helper {
 			if(ownPairs[i].term.hashCode() % numOfHelpers == ID)
 				allPairs.add(ownPairs[i]);
 		}
+		ownPairs = null;
 	}
 	
 
