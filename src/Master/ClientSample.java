@@ -11,6 +11,10 @@ import java.util.Scanner;
 
 public class ClientSample {
 	public static void main(String[] args) throws NumberFormatException, UnknownHostException, IOException {
+		
+		long startTime = 0;
+		long endTime = 0;
+		long timeElapsed = 0;
 
 		if(args.length < 1) {
 			System.out.println("Not enough args!");
@@ -32,7 +36,8 @@ public class ClientSample {
 			System.out.println("Enter command (indexdir/indexdoc/search): ");
 			String cmd = scanner.nextLine() + "\n";
 			String[] cmdParts = cmd.split("\\s+");
-			String str = " ";
+			String str = " ";				
+			startTime = System.currentTimeMillis();
 			if (cmdParts[0].equals("indexdir")) {
 				if(cmdParts.length < 2) {
 					System.err.println("Not enough arguments!");
@@ -119,6 +124,9 @@ public class ClientSample {
 					System.out.println(str);
 				}
 			}
+			endTime = System.currentTimeMillis();
+			timeElapsed = endTime - startTime;
+			System.out.println("Response time (ms): " + timeElapsed);
 			
 		}
 		
