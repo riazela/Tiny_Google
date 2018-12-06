@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -25,13 +26,15 @@ public class Master {
 	private static Hashtable<String,Integer> Doc2ID = new Hashtable<String,Integer>();
 	private static Hashtable<Integer,Integer> ID2Port = new Hashtable<Integer,Integer>();
 	private static int i = -1;
-	private static BufferedReader[] inputSteamList;
+	private static BufferedReader[] inputStreamList;
 	private static OutputStreamWriter[] outputStreamList;
 	private static Socket[] sockets;
 	private static int numOfHelpers;
 	private static Hashtable<Integer, String[]> Helper2Doc = new Hashtable<Integer, String[]>();
 	private static Hashtable<Integer, Integer> Doc2Helper = new Hashtable<Integer, Integer>();
 	private static Hashtable<Integer,ArrayList<Integer>> AssignedList;
+	private static LinkedList<DocFreq> allPairs = new LinkedList<>();
+
 	
 	
 	private static Indexer indexer = new Indexer();
@@ -107,7 +110,7 @@ public class Master {
 
 			}
 			
-//			
+		
 //			for(Integer key: ID2Doc.keySet()) {
 //				
 //				TermDocPair[] pairs = null;
@@ -135,19 +138,77 @@ public class Master {
 		synchronized (indexer) {
 			String str = "";
 			String[] queryTerms = new TokenScanner(query).getAllTokens();
-			LinkedList<DocFreq> results = indexer.search(queryTerms);
-			for (DocFreq docFreq : results) {
-				System.out.println(docFreq.docID + "    " + docFreq.freq);
+//			LinkedList<DocFreq> results = indexer.search(queryTerms);
+//			for (DocFreq docFreq : results) {
+//				System.out.println(docFreq.docID + "    " + docFreq.freq);
+//				
+//				str = str + ID2Doc.get(docFreq.docID ) + "    " + docFreq.freq + "\n";
+//			}
+			
+			broadcast("search");
+			
+			for (int i = 0; i < outputStreamList.length; i++) {
 				
-				str = str + ID2Doc.get(docFreq.docID ) + "    " + docFreq.freq + "\n";
+				sendToHelper(i, query);
 			}
+			
+			
+			if (!Master.getHelpersAck()) {
+				System.out.println("Helpers search failed!");
+				return "";
+			}	
+			System.out.println("Master got search Ack from helpers");
+			
+			getFromHelpers();
+			str = mergeSearchResult(queryTerms);
 			
 			return str;
 		}
 	}
 	
+	public static String mergeSearchResult(String[] queryTerms) {
+		
+		String str = "";
+		
+		allPairs = indexer.resultOfTheSearch(queryTerms, allPairs.toArray(new DocFreq[0]));
+		DocFreq[] sortedResults = allPairs.toArray(new DocFreq[0]);
+		Arrays.sort(sortedResults, new Comparator<DocFreq>() {
+			@Override
+			public int compare(DocFreq o1, DocFreq o2) {
+				return o2.freq-o1.freq;
+			}
+		});
+		
+		for (DocFreq docFreq : sortedResults) {
+			str = str + ID2Doc.get(docFreq.docID) + "   " 
+					  + String.valueOf(docFreq.freq) + "\n";
+		}
+		
+		return str;
+	}
+	
+	public static void getFromHelpers() {
+		for (int i = 0; i < inputStreamList.length; i++) {
+			try {
+				String str = inputStreamList[i].readLine();
+				String[] strArr = str.split(" ");
+				for (int t = 0; t < strArr.length; t++) {
+					String[] docfreq = strArr[t].split(":");
+					int doc = Integer.parseInt(docfreq[0]);
+					int freq = Integer.parseInt(docfreq[1]);
+					DocFreq newPair = new DocFreq(doc, freq);
+					allPairs.add(newPair);
+				}
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static void connectToHelpers(String[] list) {
-		inputSteamList= new BufferedReader[list.length]; 
+		inputStreamList= new BufferedReader[list.length]; 
 		outputStreamList = new OutputStreamWriter[list.length];
 		numOfHelpers = list.length;
 		
@@ -159,7 +220,7 @@ public class Master {
 			int portH = Integer.parseInt(ipPortPort[2]);
 			try {
 				Socket socket = new Socket(ip, portM);
-				inputSteamList[i] = new BufferedReader( 
+				inputStreamList[i] = new BufferedReader( 
 						new InputStreamReader(socket.getInputStream())); 
 				outputStreamList[i] = new OutputStreamWriter(socket.getOutputStream());
 				String str = "";
@@ -182,10 +243,10 @@ public class Master {
 	}
 	
 	public static boolean getHelpersAck() {
-		for (int i = 0; i < inputSteamList.length; i++) {
+		for (int i = 0; i < inputStreamList.length; i++) {
 			String ack;
 			try {
-				ack = inputSteamList[i].readLine();
+				ack = inputStreamList[i].readLine();
 				if(!ack.equals("ok")) {
 					return false;
 				}
