@@ -167,6 +167,8 @@ public class Indexer {
 		Arrays.sort(partialResults);
 		int counter = 1;
 		LinkedList<DocFreq> results = new LinkedList<>();
+		if (counter==terms.length)
+			results.add(partialResults[0]);
 		for (int i = 1; i < partialResults.length; i++) {
 			if (partialResults[i].docID==partialResults[i-1].docID) {
 				counter++;
@@ -177,6 +179,7 @@ public class Indexer {
 			if (counter==terms.length)
 				results.add(partialResults[i]);
 		}
+		
 		return results;
 	}
 	

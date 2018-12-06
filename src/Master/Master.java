@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -24,6 +25,7 @@ import SearchEngine.TokenScanner;
 public class Master {
 	private static Hashtable<Integer, String> ID2Doc = new Hashtable<Integer,String>();
 	private static Hashtable<String,Integer> Doc2ID = new Hashtable<String,Integer>();
+	private static HashSet<Integer> newDocs;
 	private static int i = -1;
 	private static BufferedReader[] inputStreamList;
 	private static OutputStreamWriter[] outputStreamList;
@@ -70,8 +72,13 @@ public class Master {
 			int hid = id % numOfHelpers;
 			
 			broadcast("index");
+			for (int i = 0; i < inputStreamList.length; i++) {
+				if (i==hid)
+					sendToHelper(hid, str);
+				else
+					sendToHelper(i, "");
+			}
 			
-			sendToHelper(hid, str);
 			
 			if (!Master.getHelpersAck()) {
 				System.out.println("Helpers index failed!");
@@ -106,6 +113,7 @@ public class Master {
 			
 			File[] docsFile = dir.listFiles();
 			Integer id = 0;
+			newDocs = new HashSet<>();
 			for (int i = 0; i < docsFile.length; i++) {
 				if (!ID2Doc.isEmpty()) {
 					id = maxID() + 1;
@@ -113,6 +121,7 @@ public class Master {
 				if(!Doc2ID.containsKey(docsFile[i].getName())) {
 					ID2Doc.put(id, docsFile[i].getName());
 					Doc2ID.put(docsFile[i].getName(), id);
+					newDocs.add(id);
 				}
 
 			}
@@ -147,7 +156,6 @@ public class Master {
 	public static String mergeSearchResult(String[] queryTerms) {
 		
 		String str = "";
-		
 		allPairs = indexer.resultOfTheSearch(queryTerms, allPairs.toArray(new DocFreq[0]));
 		DocFreq[] sortedResults = allPairs.toArray(new DocFreq[0]);
 		Arrays.sort(sortedResults, new Comparator<DocFreq>() {
@@ -174,12 +182,11 @@ public class Master {
 		for (int i = 0; i < inputStreamList.length; i++) {
 			try {
 				String str = inputStreamList[i].readLine();
-				
 				if (!str.contains(":"))
 					continue;
-				
 				String[] strArr = str.split("\\s+");
 				for (int t = 0; t < strArr.length; t++) {
+					System.out.println(strArr[t]);
 					String[] docfreq = strArr[t].split(":");
 					int doc = Integer.parseInt(docfreq[0]);
 					int freq = Integer.parseInt(docfreq[1]);
@@ -275,7 +282,7 @@ public class Master {
 		
 		for (int i = 0; i < numOfHelpers; i++) {
 			ArrayList<Integer> arr = new ArrayList<Integer>();
-			for(Integer key: ID2Doc.keySet()) {
+			for(Integer key: newDocs) {
 				if(key % numOfHelpers == i) {
 					arr.add(key);
 				}	

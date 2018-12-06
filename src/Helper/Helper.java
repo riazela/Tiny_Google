@@ -35,13 +35,15 @@ public class Helper {
 	private static boolean waitingForOtherHelper = true;
 	private static TermDocPair[] ownPairs;
 	private static LinkedList<TermDocPair> allPairs;
+	private static String INDEX_ADDRESS;
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
+		if (args.length != 2) {
 			System.err.println("Usage: Helper <Master Listening Port>");
 			System.exit(-1);
 		}
 		portM = Integer.parseInt(args[0]);
+		INDEX_ADDRESS = args[1];
 		listenForMaster();
 
 	}
@@ -106,6 +108,8 @@ public class Helper {
 				if (cmd.equals("index")) {
 					String str = inputSteam.readLine();
 					String strArr[] = str.split(" ");
+					if (!str.contains(":"))
+						strArr = new String[0];
 					int[] docID = new int[strArr.length];
 					String[] path = new String[strArr.length];
 					for (int i = 0; i < strArr.length; i++) {
@@ -124,7 +128,7 @@ public class Helper {
 					addOwnPairsToAll();
 					getFromOthers();
 					mergeAllTogether();
-					indexer.saveToFile(String.valueOf(ID));
+					indexer.saveToFile(INDEX_ADDRESS+"/"+String.valueOf(ID));
 					sendMasterAck();
 				} else if (cmd.equals("search")) {
 					String str = inputSteam.readLine();
@@ -164,7 +168,7 @@ public class Helper {
 
 	private static void mergeAllTogether() {
 		// TODO Auto-generated method stub
-		TermDocPair[] allPairsArr = allPairs.toArray(new TermDocPair[allPairs.size()]);
+		TermDocPair[] allPairsArr = allPairs.toArray(new TermDocPair[0]);
 		allPairsArr = indexer.mergeSortedList(allPairsArr);
 		indexer.addToIndex(allPairsArr);
 		System.out.println("allpairs added to index");
@@ -258,7 +262,11 @@ public class Helper {
 			if (i != ID) {
 				try {
 					String str = inputStreamList[i].readLine();
-					String[] strArr = str.split(" ");
+					String[] strArr;
+					if (str.contains(":"))
+						strArr= str.split(" ");
+					else
+						strArr = new String[0];
 					for (int t = 0; t < strArr.length; t++) {
 						String[] termdocfreq = strArr[t].split(":");
 						String term = termdocfreq[0];
