@@ -21,7 +21,10 @@ public class HadoopIndexReducer
     for (TermFreqWritable value : values) {
         String doc = value.getTerm().toString();
         doc.replaceAll(":", "");
-        counter.put(doc, counter.getOrDefault(doc, new Integer(0)) + value.getFreq().get());
+        Integer j = counter.get(doc);
+        if (j == null)
+        	j=0;
+        counter.put(doc, j + value.getFreq().get());
     }
     
     //sorting the documents based on name
